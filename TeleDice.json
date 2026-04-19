@@ -1,0 +1,103 @@
+{
+  "name": "TeleDiceBot",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d3b55752-95ff-44e0-80fb-9307aa7cabdd",
+      "name": "Telegram Trigger",
+      "webhookId": "75180a6a-9380-4958-af5c-341750522ae1",
+      "credentials": {
+        "telegramApi": {
+          "id": "uunpeDXY9WEoxOQC",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const message = $input.first().json.message.text || \"\";\nconst chatId = $input.first().json.message.chat.id;\nconst threadId = $input.first().json.message.message_thread_id || \"\"; // Hangi odadan geldiğini bulur\n\nif (!message.toLowerCase().startsWith('/roll')) return []; \n\nlet input = message.replace(/^\\/roll/i, '').trim().toLowerCase();\nif (!input) return [{ json: { chatId, threadId, reply: \"Lütfen komut girin. Örn: /roll 1d20 adv veya /roll 1d8+2d8\" } }];\n\nlet isAdv = input.includes('adv');\nlet isDis = input.includes('dis');\ninput = input.replace('adv', '').replace('dis', '').trim();\n\nif (/[^0-9d+\\-\\s]/.test(input)) {\n    return [{ json: { chatId, threadId, reply: \"Geçersiz format! Sadece zar, sayı, +, -, adv, dis kullanın.\" } }];\n}\n\ninput = input.replace(/\\s+/g, '');\nlet cleanInput = input; \nif (input[0] !== '+' && input[0] !== '-') {\n    input = '+' + input;\n}\n\nconst terms = input.match(/[+-][^+-]+/g);\nif (!terms) return [{ json: { chatId, threadId, reply: \"Zar okunamadı.\" } }];\n\nfunction rollExpression() {\n    let total = 0;\n    let details = [];\n    \n    for (let term of terms) {\n        let sign = term[0] === '+' ? 1 : -1;\n        let val = term.substring(1);\n        \n        if (val.includes('d')) {\n            let parts = val.split('d');\n            let count = parts[0] === '' ? 1 : parseInt(parts[0]);\n            let sides = parseInt(parts[1]);\n            \n            let termRolls = [];\n            for (let i = 0; i < count; i++) {\n                let r = Math.floor(Math.random() * sides) + 1;\n                termRolls.push(r);\n                total += sign * r;\n            }\n            details.push(`${sign === 1 ? '+' : '-'}[${termRolls.join(',')}]`);\n        } else {\n            let num = parseInt(val);\n            total += sign * num;\n            details.push(`${sign === 1 ? '+' : '-'}${num}`);\n        }\n    }\n    return { total, details: details.join(' ') };\n}\n\nlet finalReply = \"\";\n\nif (isAdv || isDis) {\n    let r1 = rollExpression();\n    let r2 = rollExpression();\n    let finalTotal = isAdv ? Math.max(r1.total, r2.total) : Math.min(r1.total, r2.total);\n    let cond = isAdv ? \"Avantajlı\" : \"Dezavantajlı\";\n    \n    finalReply = `🎲 **${cond} Zar:** ${cleanInput}\\n1. Atış: ${r1.details} = ${r1.total}\\n2. Atış: ${r2.details} = ${r2.total}\\n**Sonuç: ${finalTotal}**`;\n} else {\n    let r = rollExpression();\n    finalReply = `🎲 **Zar:** ${cleanInput}\\nDetay: ${r.details}\\n**Toplam: ${r.total}**`;\n}\n\n// Thread ID'yi de bir sonraki düğüme aktar\nreturn [{ json: { chatId, threadId, reply: finalReply } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "658ee229-f0b2-4eb9-b120-5b1bd1d26259",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.reply }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "message_thread_id": "={{ $json.threadId }}"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "b7daa045-5080-47fa-b9bd-6357d34764f7",
+      "name": "Send a text message",
+      "webhookId": "3fc7801a-c8b7-4377-aec8-39513281e2bf",
+      "credentials": {
+        "telegramApi": {
+          "id": "uunpeDXY9WEoxOQC",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "02484cbe-84d9-451c-abd5-d907e6e006c5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "48cb6cb2f0864b425344b3f769b4656888c08c1b784650735162654d63d0ab5b"
+  },
+  "id": "ZjiIBdcMrcssq7Xc",
+  "tags": []
+}
