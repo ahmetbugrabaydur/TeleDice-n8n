@@ -1,4 +1,8 @@
-# 🎲 TeleDice-n8n
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/79e3e4ac-c892-4608-898e-664d8838d029" width="600">
+</p>
+
+<h1 align="center">🎲 TeleDice-n8n</h1>
 
 A professional, automated dice-rolling bot for **Dungeons & Dragons** (and other TTRPGs) built entirely with **n8n**. This bot allows players to roll any combination of dice directly within a Telegram chat, making your remote gaming sessions smoother and more interactive.
 
@@ -47,12 +51,15 @@ A professional, automated dice-rolling bot for **Dungeons & Dragons** (and other
 
 ## 📝 Usage Examples
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/88dbf6cb-365b-44bf-b109-198e656a2e1c" width="600" alt="TeleDice Usage Examples">
+</p>
+
 * `/roll d20` — Rolls a single 20-sided die.
 * `/roll d20 adv` — Rolls with **Advantage** (takes the higher of two rolls).
 * `/roll d20 dis` — Rolls with **Disadvantage** (takes the lower of two rolls).
 * `/roll 2d6 + 4` — Rolls two 6-sided dice and adds a +4 modifier.
 * `/roll 1d100` — For those critical percentile checks!
-
 ---
 
 ## 🤝 Contributing
